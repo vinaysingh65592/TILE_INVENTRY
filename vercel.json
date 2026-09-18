@@ -1,4 +1,7 @@
 {
   "buildCommand": "npm run vercel-build",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "env": {
+    "DATABASE_URL": "file:./dev.db"
+  }
 }

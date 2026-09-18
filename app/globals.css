@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-sidebar: #0f172a;
+    --text-primary: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --accent-orange: #ea580c;
+    --accent-amber: #d97706;
+    --accent-blue: #2563eb;
+  }
+
+  .dark {
+    --bg-main: #0b0f17;
+    --bg-card: #151c2c;
+    --bg-sidebar: #070a12;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: #1e293b;
+    --accent-orange: #f97316;
+    --accent-amber: #f59e0b;
+    --accent-blue: #3b82f6;
+  }
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Warehouse Locator Ultra Prominent Display */
+.section-badge-huge {
+  font-size: 3.5rem;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+}
+
+/* Touch friendly minimum sizing for warehouse workers */
+button, input, select, label {
+  touch-action: manipulation;
+}
+
+/* Focus styles for keyboard accessibility */
+*:focus-visible {
+  outline: 3px solid var(--accent-orange);
+  outline-offset: 2px;
+}

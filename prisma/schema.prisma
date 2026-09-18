@@ -1,0 +1,37 @@
+// Prisma schema for Tile Warehouse Inventory System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Position values: "STARTING" | "MIDDLE" | "LAST"
+
+model TileInventory {
+  id             String   @id @default(uuid())
+  tileDesignName String
+  section        String
+  position       String   // STARTING, MIDDLE, LAST
+  note           String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([tileDesignName])
+  @@index([section])
+  @@index([position])
+  @@index([createdAt])
+}
+
+model SectionConfig {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  prefix    String
+  createdAt DateTime @default(now())
+
+  @@index([prefix])
+  @@index([code])
+}

@@ -2,16 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Search, PlusCircle, Boxes, Layers, Warehouse, LogOut, Shield, User, ShieldCheck, KeyRound } from 'lucide-react';
+import { LayoutDashboard, Search, PlusCircle, Boxes, Layers, Warehouse, LogOut, Shield, User, ShieldCheck, KeyRound, Sparkles, PackagePlus } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from './AuthProvider';
 
 const baseNavItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/search', label: 'Find Tile', icon: Search, highlight: true },
-  { href: '/add-tile', label: 'Add Tile', icon: PlusCircle },
+  { href: '/display', label: 'Display Panel', icon: Sparkles, showcase: true },
+  { href: '/materials', label: 'Materials', icon: PackagePlus },
   { href: '/inventory', label: 'Inventory', icon: Boxes },
   { href: '/sections', label: 'Sections', icon: Layers },
+  { href: '/add-tile', label: 'Add Tile', icon: PlusCircle },
 ];
 
 export default function Navbar() {
@@ -192,7 +194,7 @@ export default function Navbar() {
       </header>
 
       {/* MOBILE BOTTOM NAVIGATION BAR */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950 border-t border-slate-800 px-1 py-1.5 flex items-center justify-around shadow-2xl">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950 border-t border-slate-800 px-2 py-1.5 flex items-center justify-between overflow-x-auto shadow-2xl gap-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;

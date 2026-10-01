@@ -84,3 +84,45 @@ model InventoryAuditLog {
   @@index([createdAt])
   @@index([userId])
 }
+
+model DisplayTile {
+  id              String   @id @default(uuid())
+  tileInventoryId String?
+  company         String   // Company / Brand (e.g. Kajaria, Somany, Simpolo)
+  tileDesign      String   // Design / Name
+  category        String   // Category (e.g. Floor, Wall, GVT, PGVT, Ceramic)
+  size            String   // Size (e.g. 600x1200 mm, 2x4 ft)
+  imageUrl        String?  // Image URL / photo
+  mrp             Float    // Maximum Retail Price
+  finalMrp        Float    // Final customer offer price
+  note            String?
+  addedById       String?
+  addedByName     String?
+  addedByRole     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([company])
+  @@index([category])
+  @@index([createdAt])
+}
+
+model Material {
+  id           String   @id @default(uuid())
+  company      String   // Material company (e.g. Roff, Pidilite, MYK Laticrete)
+  materialName String   // Name (e.g. Tile Adhesive T01, Epoxy Grout)
+  weight       String   // Weight / pack size (e.g. 20 kg, 5 kg)
+  category     String?  // Category (Adhesive, Grout, Spacer, Chemical)
+  mrp          Float    // Maximum Retail Price
+  finalMrp     Float    // Final selling price
+  note         String?
+  addedById    String?
+  addedByName  String?
+  addedByRole  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([company])
+  @@index([category])
+  @@index([createdAt])
+}

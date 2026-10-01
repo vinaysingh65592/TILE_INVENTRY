@@ -125,3 +125,110 @@ export const ACTION_LABELS: Record<string, string> = {
   SECTION_UPDATED: 'Section Updated',
   SECTION_DELETED: 'Section Deleted',
 };
+
+// ============================================================
+// Display Tile Showcase Types
+// ============================================================
+
+export interface DisplayTileItem {
+  id: string;
+  tileInventoryId?: string | null;
+  company: string;
+  tileDesign: string;
+  category: string;
+  size: string;
+  imageUrl?: string | null;
+  mrp: number;
+  finalMrp: number;
+  note?: string | null;
+  addedById?: string | null;
+  addedByName?: string | null;
+  addedByRole?: string | null;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
+export const DISPLAY_TILE_CATEGORIES = [
+  'Floor Tile',
+  'Wall Tile',
+  'GVT / PGVT',
+  'Ceramic Floor',
+  'Double Charge',
+  'Polished Glazed Vitrified',
+  'Slab / Large Format',
+  'Outdoor / Parking',
+  'Subway / Mosaic',
+  'Other',
+] as const;
+
+export const COMMON_TILE_SIZES = [
+  '600 x 1200 mm (2x4 ft)',
+  '800 x 1600 mm (2.6x5.2 ft)',
+  '1200 x 1800 mm (4x6 ft)',
+  '600 x 600 mm (2x2 ft)',
+  '800 x 800 mm (2.6x2.6 ft)',
+  '300 x 600 mm (1x2 ft)',
+  '300 x 450 mm (1x1.5 ft)',
+  '400 x 400 mm (16x16 in)',
+  '300 x 300 mm (1x1 ft)',
+  'Custom / Other',
+] as const;
+
+export const POPULAR_TILE_COMPANIES = [
+  'Kajaria',
+  'Somany',
+  'Simpolo',
+  'Varmora',
+  'Orientbell',
+  'Nitco',
+  'Johnson',
+  'RAK Ceramics',
+  'Qutone',
+  'Cera',
+  'Sunhearrt',
+  'Other',
+] as const;
+
+// ============================================================
+// Material Panel Types
+// ============================================================
+
+export interface MaterialItem {
+  id: string;
+  company: string;
+  materialName: string;
+  weight: string;
+  category?: string | null;
+  mrp: number;
+  finalMrp: number;
+  note?: string | null;
+  addedById?: string | null;
+  addedByName?: string | null;
+  addedByRole?: string | null;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
+export const MATERIAL_CATEGORIES = [
+  'Tile Adhesive',
+  'Epoxy Grout',
+  'Cementitious Grout',
+  'Tile Spacers & Levellers',
+  'Tile Cleaner & Chemical',
+  'Waterproofing & Sealant',
+  'Tools & Accessories',
+  'Other',
+] as const;
+
+export const POPULAR_MATERIAL_COMPANIES = [
+  'Roff (Pidilite)',
+  'Pidilite',
+  'MYK Laticrete',
+  'Weber (Saint-Gobain)',
+  'Asian Paints SmartCare',
+  'Kerakoll',
+  'Fosroc',
+  'Sika',
+  'Dr. Fixit',
+  'Other',
+] as const;

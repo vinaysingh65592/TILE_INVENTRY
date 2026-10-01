@@ -6,9 +6,13 @@ import {
   Boxes, Search, Edit, Trash2, X, AlertTriangle,
   PlusCircle, MapPin, Calendar, Minus, Plus, Save,
   ShoppingCart, Truck, History, Package, User, Shield,
-  Loader2, ChevronDown, ArrowUpDown, Info
+  Loader2, ChevronDown, ArrowUpDown, Info, Sparkles
 } from 'lucide-react';
-import { TileItem, SectionItem, TilePosition, POSITION_LABELS, AuditLogItem, ACTION_LABELS } from '@/lib/types';
+import {
+  TileItem, SectionItem, TilePosition, POSITION_LABELS,
+  AuditLogItem, ACTION_LABELS,
+  DISPLAY_TILE_CATEGORIES, COMMON_TILE_SIZES, POPULAR_TILE_COMPANIES
+} from '@/lib/types';
 import { toast } from 'sonner';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -45,6 +49,78 @@ function InventoryContent() {
   const [loadSaving, setLoadSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+
+  // Add to Display Modal State
+  const [displayModal, setDisplayModal] = useState<{ isOpen: boolean; tile: TileItem | null }>({ isOpen: false, tile: null });
+  const [displayForm, setDisplayForm] = useState({
+    company: POPULAR_TILE_COMPANIES[0] as string,
+    category: DISPLAY_TILE_CATEGORIES[0] as string,
+    size: COMMON_TILE_SIZES[0] as string,
+    imageUrl: '',
+    mrp: '',
+    finalMrp: '',
+    note: '',
+  });
+  const [isAddingToDisplay, setIsAddingToDisplay] = useState(false);
+
+  const handleOpenAddToDisplay = (tile: TileItem) => {
+    setDisplayForm({
+      company: POPULAR_TILE_COMPANIES[0],
+      category: DISPLAY_TILE_CATEGORIES[0],
+      size: COMMON_TILE_SIZES[0],
+      imageUrl: '',
+      mrp: '',
+      finalMrp: '',
+      note: tile.note || '',
+    });
+    setDisplayModal({ isOpen: true, tile });
+  };
+
+  const handleSaveToDisplay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!displayModal.tile) return;
+
+    const numMrp = parseFloat(displayForm.mrp);
+    const numFinal = parseFloat(displayForm.finalMrp);
+    if (isNaN(numMrp) || isNaN(numFinal) || numMrp < 0 || numFinal < 0) {
+      toast.error('Please enter valid MRP and Final MRP values');
+      return;
+    }
+
+    setIsAddingToDisplay(true);
+    try {
+      const res = await fetch('/api/display-tiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tileInventoryId: displayModal.tile.id,
+          company: displayForm.company,
+          tileDesign: displayModal.tile.tileDesignName,
+          category: displayForm.category,
+          size: displayForm.size,
+          imageUrl: displayForm.imageUrl,
+          mrp: numMrp,
+          finalMrp: numFinal,
+          note: displayForm.note,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to add tile to display');
+
+      toast.success(`"${displayModal.tile.tileDesignName}" added to Customer Display!`, {
+        action: {
+          label: 'View Showcase',
+          onClick: () => router.push('/display'),
+        },
+      });
+      setDisplayModal({ isOpen: false, tile: null });
+    } catch (err: any) {
+      toast.error(err.message || 'Error adding tile to display');
+    } finally {
+      setIsAddingToDisplay(false);
+    }
+  };
 
   // Fetch sections
   useEffect(() => {
@@ -508,6 +584,13 @@ function InventoryContent() {
                         <td className="p-4">
                           <div className="flex items-center justify-end gap-2">
                             <button
+                              onClick={() => handleOpenAddToDisplay(tile)}
+                              className="p-2 text-slate-400 hover:text-orange-400 bg-slate-950 hover:bg-orange-500/10 rounded-xl border border-slate-800 transition-colors"
+                              title="Add to Customer Display Showcase"
+                            >
+                              <Sparkles className="w-4 h-4 text-orange-400" />
+                            </button>
+                            <button
                               onClick={() => handleOpenSale(tile)}
                               className="p-2 text-slate-400 hover:text-amber-500 bg-slate-950 hover:bg-amber-500/10 rounded-xl border border-slate-800 transition-colors"
                               title="Record Sale"
@@ -640,27 +723,35 @@ function InventoryContent() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-4 gap-1.5">
+                    <button
+                      onClick={() => handleOpenAddToDisplay(tile)}
+                      className="flex flex-col items-center justify-center gap-1 p-2.5 bg-slate-950 rounded-2xl border border-slate-800 text-orange-400 hover:bg-orange-500/10 transition-colors"
+                      title="Add to Customer Display"
+                    >
+                      <Sparkles className="w-5 h-5 text-orange-400" />
+                      <span className="text-[11px] font-bold">Display</span>
+                    </button>
                     <button
                       onClick={() => handleOpenSale(tile)}
-                      className="flex flex-col items-center justify-center gap-1 p-3 bg-slate-950 rounded-2xl border border-slate-800 text-amber-500 hover:bg-amber-500/10 transition-colors"
+                      className="flex flex-col items-center justify-center gap-1 p-2.5 bg-slate-950 rounded-2xl border border-slate-800 text-amber-500 hover:bg-amber-500/10 transition-colors"
                     >
                       <ShoppingCart className="w-5 h-5" />
-                      <span className="text-xs font-bold">Sale</span>
+                      <span className="text-[11px] font-bold">Sale</span>
                     </button>
                     <button
                       onClick={() => handleOpenLoad(tile)}
-                      className="flex flex-col items-center justify-center gap-1 p-3 bg-slate-950 rounded-2xl border border-slate-800 text-purple-500 hover:bg-purple-500/10 transition-colors"
+                      className="flex flex-col items-center justify-center gap-1 p-2.5 bg-slate-950 rounded-2xl border border-slate-800 text-purple-500 hover:bg-purple-500/10 transition-colors"
                     >
                       <Truck className="w-5 h-5" />
-                      <span className="text-xs font-bold">Load</span>
+                      <span className="text-[11px] font-bold">Load</span>
                     </button>
                     <button
                       onClick={() => handleOpenHistory(tile)}
-                      className="flex flex-col items-center justify-center gap-1 p-3 bg-slate-950 rounded-2xl border border-slate-800 text-blue-500 hover:bg-blue-500/10 transition-colors"
+                      className="flex flex-col items-center justify-center gap-1 p-2.5 bg-slate-950 rounded-2xl border border-slate-800 text-blue-500 hover:bg-blue-500/10 transition-colors"
                     >
                       <History className="w-5 h-5" />
-                      <span className="text-xs font-bold">History</span>
+                      <span className="text-[11px] font-bold">History</span>
                     </button>
                   </div>
 
@@ -1036,6 +1127,173 @@ function InventoryContent() {
                 {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Delete Tile'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add to Display Modal */}
+      {displayModal.isOpen && displayModal.tile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl">
+            <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-orange-600 rounded-xl text-white shadow-md shadow-orange-600/30">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-100">Add to Customer Display</h3>
+                  <p className="text-xs text-slate-400">Configure brand specs, MRP, and final customer offer</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDisplayModal({ isOpen: false, tile: null })}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveToDisplay} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+              <div className="bg-slate-950/70 p-3 rounded-2xl border border-slate-800">
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tile Selected from Inventory</p>
+                <p className="text-base font-black text-slate-100 mt-0.5">{displayModal.tile.tileDesignName}</p>
+                <p className="text-xs text-slate-400">Section {displayModal.tile.section} • Current Stock: {displayModal.tile.quantity} boxes</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                    Company / Brand *
+                  </label>
+                  <input
+                    type="text"
+                    list="inv-company-suggestions"
+                    placeholder="e.g. Kajaria, Somany"
+                    value={displayForm.company}
+                    onChange={(e) => setDisplayForm({ ...displayForm, company: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500"
+                    required
+                  />
+                  <datalist id="inv-company-suggestions">
+                    {POPULAR_TILE_COMPANIES.map((c) => (
+                      <option key={c} value={c} />
+                    ))}
+                  </datalist>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                    Category *
+                  </label>
+                  <select
+                    value={displayForm.category}
+                    onChange={(e) => setDisplayForm({ ...displayForm, category: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500"
+                  >
+                    {DISPLAY_TILE_CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                  Size / Dimension *
+                </label>
+                <input
+                  type="text"
+                  list="inv-size-suggestions"
+                  placeholder="e.g. 600 x 1200 mm"
+                  value={displayForm.size}
+                  onChange={(e) => setDisplayForm({ ...displayForm, size: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500"
+                  required
+                />
+                <datalist id="inv-size-suggestions">
+                  {COMMON_TILE_SIZES.map((s) => (
+                    <option key={s} value={s} />
+                  ))}
+                </datalist>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                  Tile Picture URL (Optional)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://... image link"
+                  value={displayForm.imageUrl}
+                  onChange={(e) => setDisplayForm({ ...displayForm, imageUrl: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                    MRP (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0"
+                    placeholder="e.g. 850"
+                    value={displayForm.mrp}
+                    onChange={(e) => setDisplayForm({ ...displayForm, mrp: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-emerald-400 uppercase mb-1">
+                    FINAL MRP / OFFER (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0"
+                    placeholder="e.g. 680"
+                    value={displayForm.finalMrp}
+                    onChange={(e) => setDisplayForm({ ...displayForm, finalMrp: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                  Brief Note / Finish / Details (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  value={displayForm.note}
+                  onChange={(e) => setDisplayForm({ ...displayForm, note: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-orange-500 resize-none"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setDisplayModal({ isOpen: false, tile: null })}
+                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isAddingToDisplay}
+                  className="px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-orange-600/30 cursor-pointer"
+                >
+                  {isAddingToDisplay && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Add to Display Showcase</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

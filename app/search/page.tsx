@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react';
 import Link from 'next/link';
-import { Search, X, MapPin, PlusCircle, Filter, Layers, Navigation, Copy, Check, Info } from 'lucide-react';
+import { Search, X, MapPin, PlusCircle, Filter, Layers, Navigation, Copy, Check, Info, Package } from 'lucide-react';
 import { TileItem, SectionItem, POSITION_LABELS, TilePosition } from '@/lib/types';
 import { toast } from 'sonner';
 
@@ -312,6 +312,17 @@ export default function SearchPage() {
                             {POSITION_LABELS[tile.position] || tile.position}
                           </span>
                         </div>
+                      </div>
+
+                      {/* STOCK QUANTITY */}
+                      <div className="mt-3 flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl">
+                        <div className="flex items-center gap-2">
+                          <Package className="w-4 h-4 text-orange-500" />
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Current Stock</span>
+                        </div>
+                        <span className={`text-lg font-black ${tile.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                          {tile.quantity} <span className="text-xs font-bold text-slate-400">Boxes</span>
+                        </span>
                       </div>
 
                       {/* OPTIONAL NOTE & ACTIONS */}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { tileSchema } from '@/lib/types';
 import { ZodError } from 'zod';
+import { requireAuth, authErrorResponse, AuthError } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -67,6 +68,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await requireAuth();
+
     const body = await request.json();
 
     // 1. Validate body schema
@@ -89,25 +92,57 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 3. Create tile inventory record
-    const newTile = await db.tileInventory.create({
-      data: {
-        tileDesignName: validatedData.tileDesignName,
-        section: validatedData.section,
-        position: validatedData.position,
-        note: validatedData.note,
-      },
+    // 3. Create tile inventory record with quantity and audit log in a transaction
+    const result = await db.$transaction(async (tx) => {
+      const newTile = await tx.tileInventory.create({
+        data: {
+          tileDesignName: validatedData.tileDesignName,
+          section: validatedData.section,
+          position: validatedData.position,
+          quantity: validatedData.quantity ?? 0,
+          note: validatedData.note,
+          createdById: user.id,
+          createdByName: user.name,
+          lastUpdatedById: user.id,
+          lastUpdatedByName: user.name,
+        },
+      });
+
+      // Create initial audit log
+      await tx.inventoryAuditLog.create({
+        data: {
+          tileId: newTile.id,
+          userId: user.id,
+          userNameSnapshot: user.name,
+          userRole: user.role,
+          actionType: 'TILE_CREATED',
+          previousQuantity: 0,
+          newQuantity: validatedData.quantity ?? 0,
+          quantityChanged: validatedData.quantity ?? 0,
+          note: `Initial stock: ${validatedData.quantity ?? 0} boxes`,
+        },
+      });
+
+      return newTile;
     });
 
     return NextResponse.json(
       {
         success: true,
         message: 'Tile successfully added to inventory.',
-        data: newTile,
+        data: result,
       },
       { status: 201 }
     );
   } catch (error: any) {
+    if (error instanceof AuthError) {
+      const errRes = authErrorResponse(error);
+      return NextResponse.json(
+        { success: false, error: errRes.error },
+        { status: errRes.statusCode }
+      );
+    }
+
     if (error instanceof ZodError) {
       const issue = error.issues[0]?.message || 'Validation error';
       return NextResponse.json({ success: false, error: issue }, { status: 400 });

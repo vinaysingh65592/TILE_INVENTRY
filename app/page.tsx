@@ -246,12 +246,16 @@ export default function Dashboard() {
                 key={tile.id}
                 className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-orange-500/50 transition-colors flex items-center justify-between gap-3"
               >
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h3 className="font-bold text-slate-900 dark:text-slate-50 text-base truncate">
                     {tile.tileDesignName}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     Position: <span className="font-semibold text-slate-700 dark:text-slate-300">{POSITION_LABELS[tile.position] || tile.position}</span>
+                    {' · '}
+                    <span className={`font-bold ${tile.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                      {tile.quantity} boxes
+                    </span>
                   </p>
                 </div>
                 <div className="px-3 py-1.5 bg-orange-600 text-white font-black text-lg rounded-xl tracking-tight shrink-0 shadow-xs">

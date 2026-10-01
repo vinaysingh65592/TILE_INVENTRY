@@ -2,23 +2,26 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { PlusCircle, CheckCircle2, ArrowRight, Layers, MapPin, Sparkles, Loader2 } from 'lucide-react';
+import { PlusCircle, CheckCircle2, Layers, Loader2, Package } from 'lucide-react';
 import { SectionItem, TilePosition, POSITION_LABELS } from '@/lib/types';
 import { toast } from 'sonner';
+import { useAuth } from '@/components/AuthProvider';
 
 function AddTileFormContent() {
   const searchParams = useSearchParams();
   const initialName = searchParams.get('name') || '';
+  const { user } = useAuth();
 
   const [tileDesignName, setTileDesignName] = useState(initialName);
   const [section, setSection] = useState('');
   const [position, setPosition] = useState<TilePosition>('MIDDLE');
+  const [quantity, setQuantity] = useState<number>(0);
   const [note, setNote] = useState('');
 
   const [sectionsList, setSectionsList] = useState<SectionItem[]>([]);
   const [loadingSections, setLoadingSections] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [lastAddedTile, setLastAddedTile] = useState<{ name: string; section: string; position: string } | null>(null);
+  const [lastAddedTile, setLastAddedTile] = useState<{ name: string; section: string; position: string; quantity: number } | null>(null);
 
   const tileNameInputRef = useRef<HTMLInputElement>(null);
 
@@ -69,6 +72,11 @@ function AddTileFormContent() {
       return;
     }
 
+    if (quantity < 0 || !Number.isInteger(quantity)) {
+      toast.error('Quantity must be a whole number (0 or more).');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const res = await fetch('/api/tiles', {
@@ -78,6 +86,7 @@ function AddTileFormContent() {
           tileDesignName,
           section,
           position,
+          quantity,
           note,
         }),
       });
@@ -91,17 +100,19 @@ function AddTileFormContent() {
 
       // Success workflow
       toast.success('Tile successfully added to inventory.', {
-        description: `${data.data.tileDesignName} stored in Section ${data.data.section} (${POSITION_LABELS[data.data.position as TilePosition] || data.data.position})`,
+        description: `${data.data.tileDesignName} — ${data.data.quantity} boxes in Section ${data.data.section} (${POSITION_LABELS[data.data.position as TilePosition] || data.data.position})`,
       });
 
       setLastAddedTile({
         name: data.data.tileDesignName,
         section: data.data.section,
         position: data.data.position,
+        quantity: data.data.quantity,
       });
 
       // Reset form automatically
       setTileDesignName('');
+      setQuantity(0);
       setNote('');
       // Keep section as current or default for worker convenience
       setPosition('MIDDLE');
@@ -129,7 +140,7 @@ function AddTileFormContent() {
           Add Tile to Inventory
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          Record tile design and exact warehouse storage position
+          Record tile design, quantity, and exact warehouse storage position
         </p>
       </div>
 
@@ -210,7 +221,36 @@ function AddTileFormContent() {
           </div>
         </div>
 
-        {/* FIELD 4: OPTIONAL NOTE */}
+        {/* FIELD 4: QUANTITY */}
+        <div className="space-y-2">
+          <label htmlFor="quantity" className="block text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+            Quantity (Boxes) <span className="text-orange-600 dark:text-orange-400">*</span>
+          </label>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
+              <Package className="w-5 h-5" />
+            </div>
+            <input
+              id="quantity"
+              type="number"
+              value={quantity}
+              onChange={(e) => {
+                const val = parseInt(e.target.value, 10);
+                setQuantity(isNaN(val) ? 0 : Math.max(0, val));
+              }}
+              min={0}
+              step={1}
+              required
+              className="flex-1 px-4 py-3.5 text-base sm:text-lg font-bold bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl focus:border-orange-500 dark:focus:border-orange-500 focus:outline-hidden text-slate-900 dark:text-slate-50 min-h-[52px]"
+              placeholder="Enter quantity (e.g. 50)"
+            />
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Enter the initial stock quantity in whole boxes
+          </p>
+        </div>
+
+        {/* FIELD 5: OPTIONAL NOTE */}
         <div className="space-y-2">
           <label htmlFor="note" className="block text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
             Notes / Batch Details <span className="text-slate-400 font-normal text-xs">(Optional)</span>
@@ -243,6 +283,13 @@ function AddTileFormContent() {
             </>
           )}
         </button>
+
+        {/* CREATED BY INFO */}
+        {user && (
+          <p className="text-center text-xs text-slate-400">
+            Will be recorded as created by <span className="font-bold text-slate-600 dark:text-slate-300">{user.name}</span> ({user.role})
+          </p>
+        )}
       </form>
 
       {/* RECENT ADDITION FEEDBACK BANNER */}
@@ -255,7 +302,7 @@ function AddTileFormContent() {
                 LAST SAVED RECORD:
               </p>
               <p className="text-sm font-extrabold text-emerald-950 dark:text-emerald-100">
-                {lastAddedTile.name} &rarr; SECTION {lastAddedTile.section} ({POSITION_LABELS[lastAddedTile.position as TilePosition] || lastAddedTile.position})
+                {lastAddedTile.name} — {lastAddedTile.quantity} boxes &rarr; SECTION {lastAddedTile.section} ({POSITION_LABELS[lastAddedTile.position as TilePosition] || lastAddedTile.position})
               </p>
             </div>
           </div>

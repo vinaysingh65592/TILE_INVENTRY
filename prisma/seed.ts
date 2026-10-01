@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -8,10 +9,48 @@ export const PositionEnum = {
   LAST: 'LAST',
 } as const;
 
+function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+
 async function main() {
   console.log('🌱 Starting database seeding...');
 
-  // 1. Seed Section Configurations
+  // 1. Seed Default Users
+  const defaultUsers = [
+    {
+      name: 'Supervisor Admin',
+      username: 'supervisor',
+      password: 'admin123',
+      role: 'SUPERVISOR',
+    },
+    {
+      name: 'Salesman Rahul',
+      username: 'salesman',
+      password: 'sales123',
+      role: 'SALESMAN',
+    },
+  ];
+
+  console.log('Seeding default users...');
+  for (const user of defaultUsers) {
+    await prisma.user.upsert({
+      where: { username: user.username },
+      update: {},
+      create: {
+        name: user.name,
+        username: user.username,
+        passwordHash: hashPassword(user.password),
+        role: user.role,
+        isActive: true,
+      },
+    });
+    console.log(`  ✓ User "${user.username}" (${user.role}) ready`);
+  }
+
+  // 2. Seed Section Configurations
   const defaultSections: { code: string; prefix: string }[] = [];
 
   // A1 to A15
@@ -36,78 +75,90 @@ async function main() {
     });
   }
 
-  // 2. Seed Sample Tile Inventory
+  // 3. Seed Sample Tile Inventory
   const sampleTiles = [
     {
       tileDesignName: 'Jet Black',
       section: 'A1',
       position: PositionEnum.STARTING,
+      quantity: 50,
       note: 'Main entrance palette batch #102',
     },
     {
       tileDesignName: 'Jet Black',
       section: 'B4',
       position: PositionEnum.MIDDLE,
+      quantity: 30,
       note: 'Backup rack overflow',
     },
     {
       tileDesignName: 'Jet Black',
       section: 'C2',
       position: PositionEnum.LAST,
+      quantity: 25,
       note: 'High-gloss finish tiles',
     },
     {
       tileDesignName: 'Italian Marble',
       section: 'A2',
       position: PositionEnum.MIDDLE,
+      quantity: 100,
       note: 'Premium 60x120cm slabs',
     },
     {
       tileDesignName: 'Italian Marble',
       section: 'B3',
       position: PositionEnum.MIDDLE,
+      quantity: 75,
       note: 'Polished white Italian marble',
     },
     {
       tileDesignName: 'Royal White',
       section: 'B3',
       position: PositionEnum.LAST,
+      quantity: 60,
       note: 'Matte white ceramic',
     },
     {
       tileDesignName: 'Royal White',
       section: 'C1',
       position: PositionEnum.LAST,
+      quantity: 40,
       note: 'Standard floor tile',
     },
     {
       tileDesignName: 'Carrara Gold',
       section: 'C2',
       position: PositionEnum.MIDDLE,
+      quantity: 80,
       note: 'Gold veined white tile',
     },
     {
       tileDesignName: 'Premium Beige',
       section: 'A5',
       position: PositionEnum.STARTING,
+      quantity: 45,
       note: 'Beige anti-skid bathroom tile',
     },
     {
       tileDesignName: 'Spanish Slate',
       section: 'A3',
       position: PositionEnum.STARTING,
+      quantity: 55,
       note: 'Textured outdoor tile',
     },
     {
       tileDesignName: 'Travertine Classico',
       section: 'B12',
       position: PositionEnum.MIDDLE,
+      quantity: 35,
       note: 'Unfilled honed natural stone',
     },
     {
       tileDesignName: 'Calacatta Luxe',
       section: 'C5',
       position: PositionEnum.STARTING,
+      quantity: 90,
       note: 'Large format porcelain',
     },
   ];
@@ -126,6 +177,10 @@ async function main() {
   }
 
   console.log('✅ Database seeding finished successfully!');
+  console.log('');
+  console.log('📋 Default Login Credentials:');
+  console.log('   Supervisor: username=supervisor, password=admin123');
+  console.log('   Salesman:   username=salesman,   password=sales123');
 }
 
 main()

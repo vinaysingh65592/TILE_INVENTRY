@@ -5,20 +5,41 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 // Position values: "STARTING" | "MIDDLE" | "LAST"
 
+model User {
+  id           String              @id @default(uuid())
+  name         String
+  username     String              @unique
+  passwordHash String
+  role         String              // "SUPERVISOR" | "SALESMAN"
+  isActive     Boolean             @default(true)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  auditLogs    InventoryAuditLog[]
+
+  @@index([username])
+  @@index([role])
+}
+
 model TileInventory {
-  id             String   @id @default(uuid())
-  tileDesignName String
-  section        String
-  position       String   // STARTING, MIDDLE, LAST
-  note           String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                String              @id @default(uuid())
+  tileDesignName    String
+  section           String
+  position          String              // STARTING, MIDDLE, LAST
+  quantity          Int                 @default(0)
+  note              String?
+  createdById       String?
+  createdByName     String?
+  lastUpdatedById   String?
+  lastUpdatedByName String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  auditLogs         InventoryAuditLog[]
 
   @@index([tileDesignName])
   @@index([section])
@@ -34,4 +55,29 @@ model SectionConfig {
 
   @@index([prefix])
   @@index([code])
+}
+
+model InventoryAuditLog {
+  id               String         @id @default(uuid())
+  tileId           String
+  tile             TileInventory  @relation(fields: [tileId], references: [id], onDelete: Cascade)
+  userId           String?
+  user             User?          @relation(fields: [userId], references: [id])
+  userNameSnapshot String
+  userRole         String
+  actionType       String         // TILE_CREATED | QUANTITY_UPDATE | SALE | LOADING | TILE_EDITED | TILE_DELETED
+  previousQuantity Int?
+  newQuantity      Int?
+  quantityChanged  Int?
+  quantitySold     Int?
+  quantityLoaded   Int?
+  vehicleNumber    String?
+  referenceNumber  String?
+  note             String?
+  createdAt        DateTime       @default(now())
+
+  @@index([tileId])
+  @@index([actionType])
+  @@index([createdAt])
+  @@index([userId])
 }

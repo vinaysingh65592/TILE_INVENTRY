@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Warehouse, Lock, User, Eye, EyeOff, Loader2, UserPlus, Shield, ShoppingBag, Check } from 'lucide-react';
+import { Warehouse, Lock, User, Eye, EyeOff, Loader2, UserPlus, Shield, ShoppingBag, Check, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 type UserRole = 'SUPERVISOR' | 'SALESMAN';
@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [role, setRole] = useState<UserRole>('SALESMAN');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [submittedUser, setSubmittedUser] = useState<{ name: string; username: string; role: string } | null>(null);
   const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -55,12 +56,15 @@ export default function RegisterPage() {
         return;
       }
 
-      toast.success(`Account created as ${role}!`, {
-        description: `Welcome, ${data.user.name}. You are now signed in.`,
+      setSubmittedUser({
+        name: data.user.name,
+        username: data.user.username,
+        role: data.user.role,
       });
 
-      router.push('/');
-      router.refresh();
+      toast.success('Registration submitted!', {
+        description: 'Your account is pending verification by an administrator.',
+      });
     } catch (err) {
       console.error(err);
       toast.error('Unable to connect. Please try again.');
@@ -68,6 +72,52 @@ export default function RegisterPage() {
       setIsLoading(false);
     }
   };
+
+  if (submittedUser) {
+    return (
+      <div className="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4 overflow-y-auto">
+        <div className="w-full max-w-md bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl p-8 text-center relative overflow-hidden">
+          <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20 text-amber-500">
+            <Clock className="w-8 h-8 animate-pulse" />
+          </div>
+
+          <h2 className="text-2xl font-black text-white">Registration Submitted!</h2>
+          <p className="text-amber-400 font-bold text-xs uppercase tracking-wider mt-1">
+            Verification Pending
+          </p>
+
+          <p className="text-slate-400 text-xs mt-3 leading-relaxed">
+            Thank you, <strong className="text-slate-200">{submittedUser.name}</strong>. Your registration request for{' '}
+            <strong className="text-slate-200">{submittedUser.role}</strong> has been submitted to the System Administrator for verification.
+          </p>
+
+          <div className="mt-5 p-4 bg-slate-950 rounded-2xl border border-slate-800 text-left space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-slate-500">Username:</span>
+              <span className="font-mono text-slate-300">@{submittedUser.username}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Requested Role:</span>
+              <span className="font-bold text-slate-300">{submittedUser.role}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Verification Status:</span>
+              <span className="font-black text-amber-400">⏳ PENDING APPROVAL</span>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <Link
+              href="/login"
+              className="w-full inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 px-4 rounded-2xl transition-all shadow-md min-h-[50px] text-sm"
+            >
+              Return to Sign In
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4 overflow-y-auto">

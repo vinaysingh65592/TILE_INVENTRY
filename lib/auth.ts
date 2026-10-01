@@ -92,11 +92,12 @@ export async function getCurrentUser() {
         name: true,
         username: true,
         role: true,
+        status: true,
         isActive: true,
       },
     });
 
-    if (!user || !user.isActive) return null;
+    if (!user || !user.isActive || user.status !== 'APPROVED') return null;
 
     return user;
   } catch {
@@ -113,6 +114,7 @@ export type AuthUser = {
   name: string;
   username: string;
   role: string;
+  status: string;
   isActive: boolean;
 };
 

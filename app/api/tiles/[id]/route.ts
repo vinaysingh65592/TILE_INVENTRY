@@ -126,7 +126,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(['SUPERVISOR']);
+    const user = await requireAuth(['SUPERVISOR', 'ADMIN']);
     const { id } = await params;
 
     const existingTile = await db.tileInventory.findUnique({

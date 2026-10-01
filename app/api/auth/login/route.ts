@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       where: { username: username.trim().toLowerCase() },
     });
 
-    if (!user || !user.isActive) {
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Invalid username or password.' },
         { status: 401 }
@@ -30,6 +30,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Invalid username or password.' },
         { status: 401 }
+      );
+    }
+
+    // Check verification status
+    if (user.status === 'PENDING') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Your account is pending verification by an administrator. Please wait for admin approval before logging in.',
+          pendingVerification: true,
+        },
+        { status: 403 }
+      );
+    }
+
+    if (user.status === 'REJECTED') {
+      return NextResponse.json(
+        { success: false, error: 'Your registration request was rejected by an administrator.' },
+        { status: 403 }
+      );
+    }
+
+    if (!user.isActive) {
+      return NextResponse.json(
+        { success: false, error: 'Your account has been deactivated. Please contact an administrator.' },
+        { status: 403 }
       );
     }
 

@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Hash password and create user
+    // 3. Hash password and create user with PENDING verification status
     const passwordHash = hashPassword(password);
 
     const newUser = await db.user.create({
@@ -70,29 +70,30 @@ export async function POST(request: NextRequest) {
         username: cleanUsername,
         passwordHash,
         role: upperRole,
-        isActive: true,
+        isActive: false,
+        status: 'PENDING',
       },
       select: {
         id: true,
         name: true,
         username: true,
         role: true,
+        status: true,
         createdAt: true,
       },
     });
 
-    // 4. Automatically create session for seamless onboarding
-    await createSession(newUser.id);
-
     return NextResponse.json(
       {
         success: true,
-        message: `Account created successfully as ${newUser.role}. Welcome, ${newUser.name}!`,
+        pendingApproval: true,
+        message: `Registration submitted successfully for ${newUser.name}! Your account is pending verification by an administrator.`,
         user: {
           id: newUser.id,
           name: newUser.name,
           username: newUser.username,
           role: newUser.role,
+          status: newUser.status,
         },
       },
       { status: 201 }

@@ -21,16 +21,28 @@ async function main() {
   // 1. Seed Default Users
   const defaultUsers = [
     {
+      name: 'System Administrator',
+      username: 'admin',
+      password: 'admin123',
+      role: 'ADMIN',
+      status: 'APPROVED',
+      isActive: true,
+    },
+    {
       name: 'Supervisor Admin',
       username: 'supervisor',
       password: 'admin123',
       role: 'SUPERVISOR',
+      status: 'APPROVED',
+      isActive: true,
     },
     {
       name: 'Salesman Rahul',
       username: 'salesman',
       password: 'sales123',
       role: 'SALESMAN',
+      status: 'APPROVED',
+      isActive: true,
     },
   ];
 
@@ -38,13 +50,18 @@ async function main() {
   for (const user of defaultUsers) {
     await prisma.user.upsert({
       where: { username: user.username },
-      update: {},
+      update: {
+        role: user.role,
+        status: user.status,
+        isActive: user.isActive,
+      },
       create: {
         name: user.name,
         username: user.username,
         passwordHash: hashPassword(user.password),
         role: user.role,
-        isActive: true,
+        status: user.status,
+        isActive: user.isActive,
       },
     });
     console.log(`  ✓ User "${user.username}" (${user.role}) ready`);
@@ -179,6 +196,7 @@ async function main() {
   console.log('✅ Database seeding finished successfully!');
   console.log('');
   console.log('📋 Default Login Credentials:');
+  console.log('   Admin:      username=admin,      password=admin123');
   console.log('   Supervisor: username=supervisor, password=admin123');
   console.log('   Salesman:   username=salesman,   password=sales123');
 }

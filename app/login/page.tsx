@@ -140,7 +140,11 @@ export default function LoginPage() {
         <div className="mt-8 pt-6 border-t border-slate-800/50">
           <div className="bg-slate-950/50 rounded-xl p-4 text-center">
             <p className="text-xs text-slate-400 font-medium mb-2 uppercase tracking-wider">Default Credentials</p>
-            <div className="text-sm text-slate-300 flex justify-center space-x-6">
+            <div className="text-sm text-slate-300 flex justify-center space-x-4 sm:space-x-6">
+              <div>
+                <span className="text-purple-400 block text-xs font-bold">Admin</span>
+                <span className="font-mono text-xs">admin / admin123</span>
+              </div>
               <div>
                 <span className="text-orange-400 block text-xs font-bold">Supervisor</span>
                 <span className="font-mono text-xs">supervisor / admin123</span>

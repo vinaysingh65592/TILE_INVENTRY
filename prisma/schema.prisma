@@ -16,14 +16,16 @@ model User {
   name         String
   username     String              @unique
   passwordHash String
-  role         String              // "SUPERVISOR" | "SALESMAN"
+  role         String              // "ADMIN" | "SUPERVISOR" | "SALESMAN"
   isActive     Boolean             @default(true)
+  status       String              @default("APPROVED") // "PENDING" | "APPROVED" | "REJECTED"
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
   auditLogs    InventoryAuditLog[]
 
   @@index([username])
   @@index([role])
+  @@index([status])
 }
 
 model TileInventory {

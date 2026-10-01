@@ -19,6 +19,7 @@ export async function GET() {
         name: user.name,
         username: user.username,
         role: user.role,
+        status: user.status,
       },
     });
   } catch (error: any) {

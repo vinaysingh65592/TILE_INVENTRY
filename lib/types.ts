@@ -85,7 +85,19 @@ export interface AuthUserInfo {
   id: string;
   name: string;
   username: string;
-  role: string;
+  role: 'ADMIN' | 'SUPERVISOR' | 'SALESMAN' | string;
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED' | string;
+}
+
+export interface UserItem {
+  id: string;
+  name: string;
+  username: string;
+  role: 'ADMIN' | 'SUPERVISOR' | 'SALESMAN';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  isActive: boolean;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export const ACTION_TYPES = {

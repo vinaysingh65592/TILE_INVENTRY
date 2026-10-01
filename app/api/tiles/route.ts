@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
     if (search) {
       where.tileDesignName = {
         contains: search,
+        mode: 'insensitive',
       };
     }
 

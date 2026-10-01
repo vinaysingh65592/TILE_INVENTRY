@@ -87,6 +87,7 @@ export interface AuthUserInfo {
   username: string;
   role: 'ADMIN' | 'SUPERVISOR' | 'SALESMAN' | string;
   status?: 'PENDING' | 'APPROVED' | 'REJECTED' | string;
+  mustChangePassword?: boolean;
 }
 
 export interface UserItem {
@@ -96,6 +97,7 @@ export interface UserItem {
   role: 'ADMIN' | 'SUPERVISOR' | 'SALESMAN';
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   isActive: boolean;
+  mustChangePassword?: boolean;
   createdAt: string | Date;
   updatedAt: string | Date;
 }

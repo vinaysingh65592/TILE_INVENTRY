@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
         role: true,
         status: true,
         isActive: true,
+        mustChangePassword: true,
         createdAt: true,
         updatedAt: true,
         _count: {

@@ -20,6 +20,7 @@ export async function GET() {
         username: user.username,
         role: user.role,
         status: user.status,
+        mustChangePassword: user.mustChangePassword,
       },
     });
   } catch (error: any) {

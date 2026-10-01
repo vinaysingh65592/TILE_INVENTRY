@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Search, PlusCircle, Boxes, Layers, Warehouse, LogOut, Shield, User, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Search, PlusCircle, Boxes, Layers, Warehouse, LogOut, Shield, User, ShieldCheck, KeyRound } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from './AuthProvider';
 
@@ -119,13 +119,24 @@ export default function Navbar() {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={logout}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                Sign Out
-              </button>
+              <div className="flex gap-1.5 mt-2">
+                <Link
+                  href="/change-password"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                  title="Change Password"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Password</span>
+                </Link>
+                <button
+                  onClick={logout}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
           )}
           <div className="px-4 py-3 flex items-center justify-between">
@@ -160,6 +171,13 @@ export default function Navbar() {
               >
                 {user.role === 'ADMIN' ? 'ADM' : user.role === 'SUPERVISOR' ? 'SUP' : 'SAL'}
               </span>
+              <Link
+                href="/change-password"
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg"
+                title="Change Password"
+              >
+                <KeyRound className="w-4 h-4" />
+              </Link>
               <button
                 onClick={logout}
                 className="p-1.5 text-slate-400 hover:text-white rounded-lg cursor-pointer"

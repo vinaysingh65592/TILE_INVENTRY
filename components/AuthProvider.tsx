@@ -34,6 +34,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
       if (data.success && data.user) {
         setUser(data.user);
+        if (data.user.mustChangePassword && pathname !== '/change-password') {
+          router.push('/change-password');
+        }
       } else {
         setUser(null);
         if (pathname !== '/login' && pathname !== '/register') {

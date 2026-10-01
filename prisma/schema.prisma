@@ -18,8 +18,9 @@ model User {
   passwordHash String
   role         String              // "ADMIN" | "SUPERVISOR" | "SALESMAN"
   isActive     Boolean             @default(true)
-  status       String              @default("APPROVED") // "PENDING" | "APPROVED" | "REJECTED"
-  createdAt    DateTime            @default(now())
+  status             String              @default("APPROVED") // "PENDING" | "APPROVED" | "REJECTED"
+  mustChangePassword Boolean             @default(false)
+  createdAt          DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
   auditLogs    InventoryAuditLog[]
 

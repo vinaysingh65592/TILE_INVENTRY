@@ -94,6 +94,7 @@ export async function getCurrentUser() {
         role: true,
         status: true,
         isActive: true,
+        mustChangePassword: true,
       },
     });
 
@@ -116,6 +117,7 @@ export type AuthUser = {
   role: string;
   status: string;
   isActive: boolean;
+  mustChangePassword: boolean;
 };
 
 export async function requireAuth(allowedRoles?: string[]): Promise<AuthUser> {
